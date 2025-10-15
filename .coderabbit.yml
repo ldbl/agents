@@ -1,0 +1,163 @@
+language: en-US
+early_access: false
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+  path_instructions:
+    - path: "**"
+      instructions: |
+        - CONTEXT: This is infrastructure-as-code written by experienced DevOps engineers in controlled environments
+        - Apply the Zen of Infrastructure Code principles:
+          * Beautiful is better than ugly - Clean, readable code over complex nested expressions
+          * Explicit is better than implicit - Clear variable names and documented intentions
+          * Simple is better than complex - Straightforward logic over clever abstractions
+          * Special cases aren't special enough to break the rules - Consistency over exceptions
+          * Errors should never pass silently - Fail loud and early with clear messages
+          * In the face of ambiguity, refuse the temptation to guess - Test and verify, don't assume
+          * If the implementation is hard to explain, it's a bad idea - Complex patterns need documentation
+          * If the implementation is easy to explain, it may be a good idea - Simple solutions are often best
+        - Follow the "No hieroglyphs" principle - prefer simple, readable code over complex patterns
+        - Be strict on real risks: security vulnerabilities, breaking changes, architectural problems
+        - Be fair on established patterns: trust professional judgment for standard configurations
+        - Keep reviews concise and actionable - focus on high-impact issues only
+        - Prioritize infrastructure security and Terraform best practices over theoretical concerns
+    - path: "**/*.tf"
+      instructions: |
+        - CONTEXT: Infrastructure code is written by trusted DevOps engineers in controlled environments, not random users
+        - KISS Principle: Prefer simple validations over complex regex patterns - if code needs a decoder ring, simplify it
+        - Trust controlled inputs: Our .tfvars files are carefully managed - avoid over-validation of known constants
+        - Simple length/contains checks > complex regex for cloud provider validated formats
+        - Business logic validation > format validation (cloud providers handle formats server-side)
+        - Reference anti-patterns in CLAUDE.md when suggesting validation improvements
+        - Be strict on: Security vulnerabilities, breaking changes, resource dependencies, architectural flaws
+        - Be fair on: Hardcoded values (engineers know valid regions/zones), controlled inputs, established patterns
+        - Terraform replace() supports both literal strings and regex patterns when wrapped in forward slashes
+        - Example: replace("hello_world", "/[_]/", "-") converts underscores to dashes
+        - Use regex() function for pattern matching only (returns matches, not replacements)
+        - For complex transformations, combine replace() with split()/join()/format() as needed
+        - Validate that all Terraform functions are supported by configured terraform.required_version
+        - Focus on resource dependencies, lifecycle management, and production safety
+        - Review labels and naming conventions for GCP compliance:
+          * Kubernetes labels: domain-qualified keys with slashes allowed (e.g., 'senteca.dev/environment')
+          * GCP user-label keys: [a-z0-9_-] only, start with letter, max 63 chars, NO dots/slashes
+        - Enforce GCP limits: ≤64 labels per resource; key/value length ≤63 chars
+        - Don't over-validate inputs that DevOps engineers control (regions, zones, machine types) - GCP API will validate
+    - path: "**/validation_helpers.tf"
+      instructions: |
+        - CONTEXT: This is the single source of truth for all validation logic in the repository
+        - Consolidate validation patterns here to avoid duplication in individual modules
+        - Keep validation logic simple and business-focused - avoid over-engineering
+        - Trust cloud provider APIs for format validation (regex patterns should be minimal)
+        - Focus on essential business rules: min <= max, required relationships, security constraints
+        - Use clear, descriptive error messages that explain how to fix violations
+        - Follow KISS principle: simple validation > complex nested conditions
+    - path: "**/modules/base/metadata/**"
+      instructions: |
+        - CONTEXT: Single-purpose metadata module for naming and labeling standardization
+        - Keep module under 100 lines - this should be simple naming/labeling only
+        - No complex business validations belong here - those stay in individual modules
+        - Focus on: name sanitization, standard labels, GCP naming compliance
+        - Avoid: resource-specific validation, complex processing logic, multi-resource handling
+        - Follow single-responsibility principle - metadata processing only
+    - path: "**/.pre-commit-config.yaml"
+      instructions: |
+        - CONTEXT: This repository uses Makefile-based consistency - all hooks should use make commands when possible
+        - Validate that terraform operations use 'make fmt', 'make validate', 'make check-security' etc.
+        - Review hook versions for currency and compatibility
+        - Ensure appropriate hook arguments and exclusions
+        - Focus on consistency between manual developer workflow and automated hooks
+        - Check that security scanning (checkov) configurations align with project needs
+    - path: "**/*.py"
+      instructions: |
+        - CONTEXT: Python scripts in this repository are infrastructure automation tools (validation, deployment helpers)
+        - Focus on security vulnerabilities and infrastructure-specific best practices
+        - Validate error handling and input sanitization, especially for GCP API interactions
+        - Check subprocess calls for security issues - particularly Terraform and gcloud commands
+        - Ensure proper file path handling and validation for infrastructure file operations
+        - Review argument parsing for infrastructure-specific inputs (regions, projects, node pools)
+        - Apply "Simple is better than complex" - prefer clear infrastructure logic over clever abstractions
+    - path: "**/*.sh"
+      instructions: |
+        - CONTEXT: Shell scripts in this repository are infrastructure automation tools (terraform-docs, validation helpers)
+        - Review shell scripts for security vulnerabilities, especially those handling Terraform state and GCP resources
+        - Validate proper quoting and escaping - critical for infrastructure file paths and resource names
+        - Check for command injection risks in terraform and gcloud command construction
+        - Ensure proper error handling with set -euo pipefail - infrastructure scripts must fail fast and clearly
+        - Review integration with Makefile workflow - scripts should be callable from make targets
+        - Apply "Errors should never pass silently" - infrastructure failures must be obvious and actionable
+    - path: "**/CLAUDE.md"
+      instructions: |
+        - This file contains development guidelines and coding principles for this repository
+        - Learn from the content and apply the principles when reviewing other files
+        - Reference these guidelines in code review suggestions when applicable
+        - Focus on practical patterns and infrastructure safety principles described in this file
+    - path: "**/.github/workflows/*.yml"
+      instructions: |
+        - CONTEXT: GitHub Actions workflows for Terraform CI/CD automation
+        - Review workflow triggers for correctness - ensure master branch triggers for production workflows
+        - Validate job dependencies and conditional logic for different event types (push, PR, workflow_dispatch)
+        - Check environment protection and approval requirements for apply operations
+        - Ensure proper secret and permission handling for GCP and GitHub integrations
+        - Validate YAML syntax and GitHub Actions best practices
+        - Focus on security: no secrets in logs, proper authentication flows, restricted permissions
+        - Review artifact handling and cleanup policies
+        - Ensure workflow names and job names are clear and descriptive
+        - Apply KISS principle: simple, readable workflow logic over complex conditional chains
+  path_filters:
+    - "**/*.tf"
+    - "**/*.tfvars"
+    - "**/*.tfvars.json"
+    - "**/*.py"
+    - "**/*.sh"
+    - "**/.pre-commit-config.yaml"
+    - "**/CLAUDE.md"
+    - "**/validation_helpers.tf"
+    - "**/modules/base/metadata/**"
+    - "**/refactoring-fixes.md"
+    - "**/.github/workflows/*.yml"
+    - "!**/.terraform/**"
+    - "!**/.terraform.lock.hcl"
+    - "!**/*.log"
+    - "!projects/devops.tfvars"
+    - "!nuke-k8s.sh"
+  tools:
+    # Security tools
+    gitleaks:
+      enabled: true
+    semgrep:
+      enabled: true
+    checkov:
+      enabled: true
+
+    # Infrastructure tools
+    hadolint:
+      enabled: true
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "**/CLAUDE.md"
+  learnings:
+    scope: "local"
+  issues:
+    scope: "local"
+  pull_requests:
+    scope: "local"
+
+
+
+chat:
+  auto_reply: false
+tone_instructions: "KISS principle: simple > complex. Assertive on security, correctness, performance. Focus on business logic and production safety. Skip format validations."
