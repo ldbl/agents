@@ -45,7 +45,7 @@ reviews:
         - Validate that all Terraform functions are supported by configured terraform.required_version
         - Focus on resource dependencies, lifecycle management, and production safety
         - Review labels and naming conventions for GCP compliance:
-          * Kubernetes labels: domain-qualified keys with slashes allowed (e.g., 'senteca.dev/environment')
+          * Kubernetes labels: domain-qualified keys with slashes allowed (e.g., 'organization.dev/environment')
           * GCP user-label keys: [a-z0-9_-] only, start with letter, max 63 chars, NO dots/slashes
         - Enforce GCP limits: ≤64 labels per resource; key/value length ≤63 chars
         - Don't over-validate inputs that DevOps engineers control (regions, zones, machine types) - GCP API will validate
@@ -125,8 +125,6 @@ reviews:
     - "!**/.terraform/**"
     - "!**/.terraform.lock.hcl"
     - "!**/*.log"
-    - "!projects/devops.tfvars"
-    - "!nuke-k8s.sh"
   tools:
     # Security tools
     gitleaks:
